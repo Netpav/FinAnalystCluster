@@ -1,0 +1,22 @@
+
+nohup python2.7 skript.py &
+
+cd FinAnalV2/AnalPipeline
+
+nohup python2.7 docs_to_vectors_bulk.py &
+
+===
+
+jobs -l
+
+kill PIP
+
+ps -aux
+top -u <user>
+
+===mysql===
+SHOW STATUS LIKE 'Qcache%';
+
+RESET QUERY CACHE
+
+show variables like '%query%'
