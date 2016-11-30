@@ -1,0 +1,25 @@
+Postup proccesingu:
+*******************************************************************************
+1) ziskani vsech clanku ze zvoleneho zdroje 
+python export_docs_for_company.py --company_id X --doc_type X --date_from 2016-01-01 --date_to 2016-06-30 --output_dir ~/
+
+2) Priprava dat pro shlukování = VecText
+perl ~/VecText/vectext-cmdline.pl --input=data.txt --output_dir=. --output_file=data --local_weights="Term Frequency (TF)" --output_format=cluto --min_word_length=3 --min_document_frequency=3 --output_original_texts --create_dictionary="with frequencies" --print_statistics --encoding=utf8 
+
+3) shlukování : CLUTO
+~/Cluto/cluto-2.1.2/Linux-x86_64/vcluster -crfun=h1 -clmethod=direct ~/data.cluto.sparse X
+x... pocet shluku
+3.1)  Nahrazeni tridy 0 za 2:
+sed -i -e 's/0/2/g' data.cluto.sparse X   = nahrazeni 0 za 2
+
+4) slouceni trid(shluky) + clanky
+cut -f1,2 -d, data.original.txt > dates; paste data.sparse.clustering.10 dates > data.classes.txt
+
+5) Vektorizace dat pro klasifiakci (SPARSE, ARFF)
+perl ~/VecText/vectext-cmdline.pl --input= $file$<data.classes.txt>  --encoding="utf8" --class_position=1 --output_dir="." --output_file="$name$" --local_weights="Term Frequency (TF)" --output_format="ARFF" --min_word_length=3 --min_document_frequency=3 --output_original_texts --create_dictionary="with frequencies" --print_statistics --encoding=utf8 --output_decimal_places=3 --sort_attributes=none
+
+6) Sada klasifikacnich algoritmu 
+perl Weka_obmeny.pl
+perl MOA_obmeny.pl
+
+TODO: Proccesing results log
