@@ -18,7 +18,8 @@ FNULL = open(os.devnull, 'w')
 current_dir = os.path.dirname(os.path.abspath(__file__))
 # Program params
 default_vectext_params = '--input={input_file} --output_dir={output_dir} --output_file={output_file} --local_weights="Term Frequency (TF)" --output_format={output_format} --min_word_length=3 --min_document_frequency=3 --output_original_texts --create_dictionary="with frequencies" --print_statistics --encoding=utf8'
-default_vectext_params_arff = '--input={input_file} --output_dir={output_dir} --output_file={output_file} --class_position=1 --local_weights="Term Frequency (TF)" --output_format={output_format} --min_word_length=3 --min_document_frequency=3 --output_original_texts --create_dictionary="with frequencies" --print_statistics --encoding=utf8 '
+default_vectext_params_arff = '--input={input_file} --output_dir={output_dir} --output_file={output_file} --class_position=1 --local_weights="Term Frequency (TF)" --output_format={output_format} --min_word_length=3 --min_document_frequency=3 --output_original_texts --create_dictionary_freq --print_statistics --case="lower case" --output_decimal_places=3 --encoding=utf8'
+# default_vectext_params_arff = '--input={input_file} --output_dir={output_dir} --output_file={output_file} --class_position=1 --local_weights="Term Frequency (TF)" --output_format={output_format} --min_word_length=3 --min_document_frequency=5 --output_original_texts --create_dictionary_freq --print_statistics --logarithm_type="natural" --output_original_texts --output_tokens --preserve_numbers --case="lower case" --preserve_emoticons --output_decimal_places=3 --sort_attributes=none --encoding=utf8'
 
 
 default_cluto_params = '-crfun=h1 -clmethod=direct {input_file} {cluster_count} > {cluto_log}'
@@ -50,7 +51,8 @@ def cluster_vector_file(file_path, cluster_count, output_dir):
     real_cluto_params = default_cluto_params.format(input_file=file_path, cluster_count=cluster_count, cluto_log='log_' + file_name +'.'+ str(cluster_count))
     run_cmd = '{0} {1}'.format(cluto_path, real_cluto_params)
     ret_code = subprocess.call(run_cmd, shell=True, stdout=FNULL, stderr=FNULL)
-    print('return code: {0}'.format(ret_code))
+    print('return code cluto: {0}'.format(ret_code))
+
     os.chdir(current_dir)
 
 ###########
@@ -73,6 +75,8 @@ if __name__ == "__main__":
             for cl_c in cluster_counts:
                 cluster_vector_file(file_path, cl_c, os.path.join(temp_dir, 'vectext_1'))
 
+
+
     # Tohle asi neni potreba
     # print('======Replace class 0 with 2 in cluto files======')
     # files_dir = os.path.join(temp_dir, 'cluto_1')
@@ -91,6 +95,9 @@ if __name__ == "__main__":
     # You must get all files from cluto_1/ and connect them with files from inputs/ and save the result to cluto_2/
     # if file_name.endswith('original.txt'):
     os.chdir(results_dir)
+    run_cmd_sed = "sed -i -e 's/0/2/g' %s" %(sparse_file)
+    ret_code_sed = subprocess.call(run_cmd_sed, shell=True, stdout=FNULL, stderr=FNULL)
+    print('return code sed : {0}'.format(ret_code_sed))
     run_cmd_dos2unix = 'dos2unix %s| dos2unix %s ' %(orig_file,sparse_file)
     ret_code_dos2unix = subprocess.call(run_cmd_dos2unix, shell=True, stdout=FNULL, stderr=FNULL)
     print('return code: {0}'.format(ret_code_dos2unix))
@@ -100,9 +107,9 @@ if __name__ == "__main__":
     ret_code_cut = subprocess.call(run_cmd_cut, shell=True, stdout=FNULL, stderr=FNULL)
     print('return code: {0}'.format(ret_code_cut))
 
-    run_cmd_sed = "sed -i -e 's/0/2/g' %s" %(class_file)
-    ret_code_sed = subprocess.call(run_cmd_sed, shell=True, stdout=FNULL, stderr=FNULL)
-    print('return code: {0}'.format(ret_code_sed))
+    # # run_cmd_sed = "sed -i -e 's/0/2/g' %s" %(class_file)
+    # ret_code_sed = subprocess.call(run_cmd_sed, shell=True, stdout=FNULL, stderr=FNULL)
+    # print('return code: {0}'.format(ret_code_sed))
     # os.chdir(current_dir)
 
     print('======Convert text files with new classes to vectors======')
